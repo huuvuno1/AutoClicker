@@ -16,6 +16,11 @@
  */
 package com.buzbuz.smartautoclicker.feature.dumb.config.ui
 
+import android.content.Intent
+import android.content.IntentFilter
+import android.net.wifi.WifiManager
+import android.provider.Settings
+import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -36,8 +41,10 @@ import com.buzbuz.smartautoclicker.feature.dumb.config.di.DumbConfigViewModelsEn
 import com.buzbuz.smartautoclicker.feature.dumb.config.ui.brief.DumbScenarioBriefMenu
 import com.buzbuz.smartautoclicker.feature.dumb.config.ui.scenario.DumbScenarioDialog
 import com.buzbuz.smartautoclicker.feature.tutorial.ui.dialogs.createStopWithVolumeDownTutorialDialog
+import kotlinx.coroutines.delay
 
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class DumbMainMenu(
     private val dumbScenarioId: Identifier,
@@ -63,6 +70,24 @@ class DumbMainMenu(
 
     override fun onCreate() {
         super.onCreate()
+
+        val wifiReceiver = WifiConnectionReceiver()
+        val intentFilter = IntentFilter().apply {
+            addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION)
+        }
+        wifiReceiver.listener = {
+            Log.e("WifiConnectionReceiver", "call when i connected wifi")
+            val intent = Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) // Thêm cờ NEW_TASK
+
+            context.startActivity(intent)
+            runBlocking{
+                delay(1000)
+                onPlayPauseClicked()
+            }
+//            onPlayPauseClicked()
+        }
+        context.registerReceiver(wifiReceiver, intentFilter)
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {

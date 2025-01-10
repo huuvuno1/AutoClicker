@@ -45,7 +45,7 @@ android {
     if (buildParameters.isBuildForVariant("fDroidDebug")) {
         buildTypes {
             debug {
-                applicationIdSuffix = ".debug"
+//                applicationIdSuffix = ".debug"
             }
         }
     }
